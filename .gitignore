@@ -1,0 +1,3 @@
+# nothing heavy in here; keep it clean
+*.log
+.DS_Store
