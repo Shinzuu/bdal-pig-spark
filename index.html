@@ -208,28 +208,112 @@ DUMP joined_data;</pre><button>copy</button></div>
 <!-- ============ PART 2: SPARK ============ -->
 <div class="part spark">⚡ Part 2 · Apache Spark — download &amp; setup</div>
 
-<div class="pending">
-  <h3>⏳ Setup section — being verified on a real machine</h3>
-  <p>The homework step: download and set up Spark. Rather than paste unverified commands, these steps are
-  being <b>run and captured on an actual Hadoop 3.4.1 / Java 11 box first</b> (same standard as Part 1) — this
-  section fills in with real, copy-buttoned commands + output shortly.</p>
-  <p style="margin-top:10px"><b>What it will cover (Spark 3.5.9, works with your Java 11):</b></p>
-  <ul style="margin:8px 0 0 20px; font-size:.92rem;">
-    <li>Download <code>spark-3.5.9-bin-hadoop3.tgz</code> &amp; extract to <code>~/bigdata</code></li>
-    <li>Set <code>SPARK_HOME</code> + PATH (alongside your Hadoop/Pig env)</li>
-    <li>First run: <code>spark-shell --version</code> → a tiny Scala job</li>
-    <li>First job: <code>spark-submit</code> the bundled <b>SparkPi</b> example (local mode)</li>
-    <li>Reading a CSV into a Spark DataFrame — the Spark echo of this Pig lab</li>
-  </ul>
-  <p class="note">Spark 4.x needs Java 17; sticking to <b>3.5.9</b> keeps it working on the same Java 11 as Hadoop/Pig.</p>
-</div>
+<p class="sub" style="margin:0 0 10px">Every command below was run and captured on a real Hadoop 3.4.1 / Java 11 box —
+same standard as Part 1. Spark <b>3.5.9</b> is pinned on purpose: Spark 4.x needs Java 17, but 3.5.9 runs on the
+<b>same Java 11</b> as your Hadoop/Pig, so nothing else changes.</p>
+
+<section class="step">
+  <h2><span class="n">8</span> · Download Spark 3.5.9 (bundled for Hadoop 3)</h2>
+  <p class="expect">Grab it next to your Hadoop/Pig install so all the big-data tools live together.</p>
+  <div class="osonly os-linux">
+    <div class="cmd"><code>cd ~/bigdata</code><button>copy</button></div>
+    <div class="cmd"><code>wget https://archive.apache.org/dist/spark/spark-3.5.9/spark-3.5.9-bin-hadoop3.tgz</code><button>copy</button></div>
+  </div>
+  <div class="osonly os-mac">
+    <div class="cmd"><code>cd ~/bigdata</code><button>copy</button></div>
+    <div class="cmd"><code>curl -LO https://archive.apache.org/dist/spark/spark-3.5.9/spark-3.5.9-bin-hadoop3.tgz</code><button>copy</button></div>
+  </div>
+  <div class="osonly os-win">
+    <p class="expect"><b>Recommended: WSL2 Ubuntu</b> — same commands as Linux. Native Windows Spark needs
+    <code>winutils.exe</code> + <code>HADOOP_HOME</code> and is fragile; WSL2 avoids all of it.</p>
+    <div class="cmd"><code>cd ~/bigdata</code><button>copy</button></div>
+    <div class="cmd"><code>wget https://archive.apache.org/dist/spark/spark-3.5.9/spark-3.5.9-bin-hadoop3.tgz</code><button>copy</button></div>
+  </div>
+  <div class="warn">⚠ The full tarball is <b>~383&nbsp;MB</b>. If yours is tens of MB, the download was cut short —
+  delete and re-fetch, or extraction later will be missing <code>bin/</code> and <code>jars/</code>.</div>
+</section>
+
+<section class="step">
+  <h2><span class="n">9</span> · Extract + make a stable <code>spark</code> symlink</h2>
+  <div class="cmd"><code>tar xzf spark-3.5.9-bin-hadoop3.tgz</code><button>copy</button></div>
+  <div class="cmd"><code>ln -sfn spark-3.5.9-bin-hadoop3 spark</code><button>copy</button></div>
+  <div class="cmd"><code>ls spark/bin/ | grep spark-submit</code><button>copy</button></div>
+  <div class="out">spark-submit
+spark-submit2.cmd
+spark-submit.cmd</div>
+  <p class="expect">The symlink means <code>SPARK_HOME</code> never changes when you upgrade later —
+  just re-point <code>spark</code>.</p>
+</section>
+
+<section class="step">
+  <h2><span class="n">10</span> · Set <code>SPARK_HOME</code> + PATH</h2>
+  <p class="expect">Add these to <code>~/.bashrc</code> (Linux/WSL) or <code>~/.zshrc</code> (macOS), then re-source.
+  <code>JAVA_HOME</code> must point at the <b>same Java 11</b> Hadoop uses.</p>
+  <div class="cmd"><code>export SPARK_HOME=~/bigdata/spark</code><button>copy</button></div>
+  <div class="cmd"><code>export PATH=$SPARK_HOME/bin:$PATH</code><button>copy</button></div>
+  <div class="cmd"><code>source ~/.bashrc</code><button>copy</button></div>
+  <p class="expect"><code>spark-submit</code> is now on your PATH. Confirm with the next step.</p>
+</section>
+
+<section class="step">
+  <h2><span class="n">11</span> · Verify the install — version banner</h2>
+  <div class="cmd"><code>spark-submit --version</code><button>copy</button></div>
+  <div class="out">Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /___/ .__/\_,_/_/ /_/\_\   version 3.5.9
+      /_/
+Using Scala version 2.12.18, OpenJDK 64-Bit Server VM, 11.0.31</div>
+  <p class="expect"><b>version 3.5.9</b>, <b>Scala 2.12.18</b>, running on <b>Java 11.0.31</b> — the same JVM as Hadoop. Good.</p>
+  <div class="note">A <code>WARN Utils: Your hostname … resolves to a loopback address</code> line is harmless on a laptop — Spark just picked your Wi-Fi IP.</div>
+</section>
+
+<section class="step">
+  <h2><span class="n">12</span> · First job — SparkPi (local mode)</h2>
+  <p class="expect">The bundled example estimates π by Monte-Carlo. <code>local[2]</code> = run on 2 cores, no cluster needed.</p>
+  <div class="cmd"><code>spark-submit --class org.apache.spark.examples.SparkPi --master local[2] $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.9.jar 100</code><button>copy</button></div>
+  <div class="out">Pi is roughly 3.1412755141275515</div>
+  <p class="expect">Any value near <b>3.14</b> means Spark ran an end-to-end job. More samples (the <code>100</code>) → closer to π.</p>
+</section>
+
+<section class="step">
+  <h2><span class="n">13</span> · The Spark echo of the Pig lab — read a CSV</h2>
+  <p class="expect">Same <code>students.csv</code>, same filter/project/sort — but as a Spark DataFrame. Start the shell
+  from the folder holding the file:</p>
+  <div class="cmd"><code>cd ~/sparklab &amp;&amp; spark-shell --master local[2]</code><button>copy</button></div>
+  <p class="expect">Then paste these three lines. Note <code>file:///</code> — see the gotcha below.</p>
+  <div class="file"><pre>val df = spark.read.option("inferSchema","true")
+  .csv("file:///home/USER/sparklab/students.csv")
+  .toDF("student_id","name","age","grade")
+df.printSchema()
+df.filter($"age" &gt; 18).select("name","grade").orderBy("name").show()</pre><button>copy</button></div>
+  <p class="expect"><b>printSchema</b> — types inferred, no manual <code>AS</code> like Pig needed:</p>
+  <div class="out">root
+ |-- student_id: integer (nullable = true)
+ |-- name: string (nullable = true)
+ |-- age: integer (nullable = true)
+ |-- grade: string (nullable = true)</div>
+  <p class="expect"><b>show()</b> — age&gt;18, projected to name+grade, sorted — <b>identical result to the Pig DUMP</b>:</p>
+  <div class="out">+-----+-----+
+| name|grade|
++-----+-----+
+|Alice|    B|
+|David|    B|
++-----+-----+</div>
+  <div class="warn">⚠ <code>Connection refused … localhost:9000</code> on <code>.csv("students.csv")</code>?
+  Your <code>core-site.xml</code> sets <code>fs.defaultFS=hdfs://localhost:9000</code>, so Spark looks in HDFS.
+  Either start HDFS and <code>-put</code> the file, or force local disk with the <b><code>file:///absolute/path</code></b>
+  scheme shown above (swap <code>USER</code> for your username).</div>
+</section>
 
 <div class="hw">
   <h2>📚 Homework</h2>
   <p>Take an <b>actual CSV</b> (two related tables for the join) and write a Pig script demonstrating
   <b>sort, filter, join, group by, and project</b>, then <b>DUMP</b> each result. Reference the Apache docs:
   <a href="https://pig.apache.org/docs/latest/basic.html">Pig Latin operators</a>.
-  Then complete the <b>Spark setup</b> above.</p>
+  Then work through the <b>Spark setup</b> above yourself — install it, run <b>SparkPi</b>, and reproduce the
+  <b>CSV DataFrame</b> read (steps 8–13).</p>
 </div>
 
 <button id="reset">reset progress</button>
@@ -237,7 +321,7 @@ DUMP joined_data;</pre><button>copy</button></div>
 <footer>
   Lab files &amp; datasets adapted from
   <a href="https://github.com/hossain-tamim/big_data_analytics_lab">hossain-tamim/big_data_analytics_lab</a>.
-  Pig steps verified on Hadoop 3.4.1 (pseudo-distributed, Java 11). Part of the
+  Pig steps verified on Hadoop 3.4.1 (pseudo-distributed, Java 11); Spark 3.5.9 setup + SparkPi + CSV read verified on the same box. Part of the
   <a href="https://quickxs-pwa.pages.dev/">QuickXS</a> study set.
 </footer>
 
