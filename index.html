@@ -282,10 +282,10 @@ Using Scala version 2.12.18, OpenJDK 64-Bit Server VM, 11.0.31</div>
   <p class="expect">Same <code>students.csv</code>, same filter/project/sort — but as a Spark DataFrame. Start the shell
   from the folder holding the file:</p>
   <div class="cmd"><code>cd ~/sparklab &amp;&amp; spark-shell --master 'local[2]'</code><button>copy</button></div>
-  <p class="expect">Then paste these three lines. Note <code>file:///</code> — see the gotcha below.</p>
-  <div class="file"><pre>val df = spark.read.option("inferSchema","true")
-  .csv("file:///home/USER/sparklab/students.csv")
-  .toDF("student_id","name","age","grade")
+  <p class="expect">Then paste these three lines. <b>Keep the first as ONE line</b> — the REPL evaluates each line on
+  arrival, so a split <code>val df = …</code> makes df a DataFrameReader and <code>printSchema</code> fails.
+  Note <code>file:///</code> — see the gotcha below (swap <code>USER</code> for your username):</p>
+  <div class="file"><pre>val df = spark.read.option("inferSchema","true").csv("file:///home/USER/sparklab/students.csv").toDF("student_id","name","age","grade")
 df.printSchema()
 df.filter($"age" &gt; 18).select("name","grade").orderBy("name").show()</pre><button>copy</button></div>
   <p class="expect"><b>printSchema</b> — types inferred, no manual <code>AS</code> like Pig needed:</p>
