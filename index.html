@@ -338,7 +338,6 @@ df.filter($"age" &gt; 18).select("name","grade").orderBy("name").show()</pre><bu
   }
   [].forEach.call(document.querySelectorAll('#os button'),function(b){
     b.addEventListener('click',function(){ setOS(b.dataset.os); }); });
-  setOS(savedOS);
 
   // copy + progress (only counts visible commands)
   var KEY='bdalpigspark.done';
@@ -376,7 +375,7 @@ df.filter($"age" &gt; 18).select("name","grade").orderBy("name").show()</pre><bu
     rows.forEach(function(r){ r.classList.remove('done'); r.querySelector('button').textContent='copy'; });
     paint();
   });
-  paint();
+  setOS(savedOS);
 })();
 </script>
 </body>
