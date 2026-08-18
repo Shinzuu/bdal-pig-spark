@@ -98,6 +98,11 @@ Part 2: download &amp; set up Apache Spark. Pig steps verified end-to-end on a r
     <tr><td><code>1,John,18,A</code> · <code>2,Alice,19,B</code><br><code>3,Bob,17,A</code> · <code>4,David,20,B</code></td>
         <td><code>1,Math,85</code> · <code>2,Math,78</code><br><code>3,Science,90</code> · <code>4,Math,88</code></td></tr>
   </table>
+  <p style="margin:12px 0 0; font-size:.88rem;"><b>⬇ Download &amp; run</b> (no typing needed):
+    <a href="assets/students.csv" download>students.csv</a> ·
+    <a href="assets/scores.csv" download>scores.csv</a> ·
+    <a href="assets/script.pig" download>script.pig</a>
+    — save all three into the same folder, then follow the steps below.</p>
   <p class="expect" style="margin-top:10px"><b>What is DUMP?</b> Pig is <b>lazy</b> — <code>LOAD/FILTER/JOIN</code>
   build a plan but run nothing. <b><code>DUMP x</code> is the trigger</b>: it launches the MapReduce job(s)
   and prints the result. "Showing the output" and "showing the DUMP" are the same thing.
