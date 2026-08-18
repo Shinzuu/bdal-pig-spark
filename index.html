@@ -272,7 +272,7 @@ Using Scala version 2.12.18, OpenJDK 64-Bit Server VM, 11.0.31</div>
 <section class="step">
   <h2><span class="n">12</span> · First job — SparkPi (local mode)</h2>
   <p class="expect">The bundled example estimates π by Monte-Carlo. <code>local[2]</code> = run on 2 cores, no cluster needed.</p>
-  <div class="cmd"><code>spark-submit --class org.apache.spark.examples.SparkPi --master local[2] $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.9.jar 100</code><button>copy</button></div>
+  <div class="cmd"><code>spark-submit --class org.apache.spark.examples.SparkPi --master 'local[2]' $SPARK_HOME/examples/jars/spark-examples_2.12-3.5.9.jar 100</code><button>copy</button></div>
   <div class="out">Pi is roughly 3.1412755141275515</div>
   <p class="expect">Any value near <b>3.14</b> means Spark ran an end-to-end job. More samples (the <code>100</code>) → closer to π.</p>
 </section>
@@ -281,7 +281,7 @@ Using Scala version 2.12.18, OpenJDK 64-Bit Server VM, 11.0.31</div>
   <h2><span class="n">13</span> · The Spark echo of the Pig lab — read a CSV</h2>
   <p class="expect">Same <code>students.csv</code>, same filter/project/sort — but as a Spark DataFrame. Start the shell
   from the folder holding the file:</p>
-  <div class="cmd"><code>cd ~/sparklab &amp;&amp; spark-shell --master local[2]</code><button>copy</button></div>
+  <div class="cmd"><code>cd ~/sparklab &amp;&amp; spark-shell --master 'local[2]'</code><button>copy</button></div>
   <p class="expect">Then paste these three lines. Note <code>file:///</code> — see the gotcha below.</p>
   <div class="file"><pre>val df = spark.read.option("inferSchema","true")
   .csv("file:///home/USER/sparklab/students.csv")
